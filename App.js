@@ -1,5 +1,5 @@
 import AppLoading from "expo-app-loading";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as Font from "expo-font";
 import { Image, useColorScheme } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,21 +24,21 @@ const loadImages = (images) =>
 
 export default function App() {
   const [ready, setReady] = useState(false);
-  const onFinish = () => setReady(true);
-  const startLoading = async () => {
-    const fonts = loadFonts([Ionicons.font]);
-    await Promise.all([...fonts]);
-  };
   const isDark = useColorScheme() === "dark";
+
+  useEffect(() => {
+    const startLoading = async () => {
+      const fonts = loadFonts([Ionicons.font]);
+      await Promise.all([...fonts]);
+      setReady(true);
+    };
+    startLoading();
+  }, []);
+
   if (!ready) {
-    return (
-      <AppLoading
-        startAsync={startLoading}
-        onFinish={onFinish}
-        onError={console.error}
-      />
-    );
+    return <AppLoading />;
   }
+
   return (
     <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
       <NavigationContainer>
