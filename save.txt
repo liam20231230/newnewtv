@@ -1,0 +1,16 @@
+<Swiper
+        horizontal
+        loop
+        autoplay
+        autoplayTimeout={4}
+        showsButtons={false}
+        showsPagination={true}
+        paginationStyle={{ marginRight: "35%" }}
+        containerStyle={{ width: "100%", height: SCREEN_HEIGHT / 2.5 }}
+        activeDotColor={isDark ? "white" : "black"}
+        dotColor="rgb(128, 128, 128)"
+        dotStyle={{ width: "2%", height: "100%" }}
+        activeDotStyle={{ width: "2%", height: "100%" }}
+        style={{ marginBottom: 20 }}
+      >
+      

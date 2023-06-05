@@ -4,5 +4,5 @@ export const lightTheme = {
 }
 export const darkTheme = {
     mainBgColor: "#121212",
-    textColor: "#abd5bd"
+    textColor: "#ffffff"
 }

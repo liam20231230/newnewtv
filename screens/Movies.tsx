@@ -1,162 +1,158 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
+  FlatList,
+  RefreshControl,
+  View,
+  Text,
   useColorScheme,
-  StyleSheet,
 } from "react-native";
 import Swiper from "react-native-swiper";
 import styled from "styled-components/native";
-import { BlurView } from "expo-blur";
-import { makeImgPath } from "../util";
-import { Ionicons } from "@expo/vector-icons";
+import HMedia from "../components/HMedia";
+import Slide from "../components/Slide";
+import VMedia from "../components/VMedia";
 
-const API_KEY = "906f6b5f3ddf18f66152a5da07d24e3b";
-
-// const isDark = useColorScheme() === "dark";
+const API_KEY = "db3232237690db45635095b5eed8ff71";
 
 const Container = styled.ScrollView``;
 
-const View = styled.View`
-  flex: 1;
-`;
-
 const Loader = styled.View`
   flex: 1;
-  align-items: center;
-  justify-content: center;
-  background: ${(props) => props.theme.mainBgColor};
-`;
-
-const BgImg = styled.Image``;
-
-const Poster = styled.Image`
-  width: 100px;
-  height: 160px;
-  border-radius: 5px;
-`;
-
-const Title = styled.Text<{ isDark: boolean }>`
-  color: ${(props) => (props.isDark ? "white" : props.theme.textColor)};
-  font-size: 16px;
-  font-weight: 600;
-`;
-
-const Wrapper = styled.View`
-  flex-direction: row;
-  height: 100%;
   justify-content: center;
   align-items: center;
-`;
-
-const Column = styled.View`
-  width: 55%;
-`;
-
-const TagLine = styled.Text<{ isDark: boolean }>`
-  margin-top: 10px;
-  color: ${(props) => props.isDark ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.8)"};
-`;
-
-const Votes = styled(TagLine)<{ isDark: boolean }>`
-  font-size: 16px;
-  color: ${(props) => props.isDark ? "rgba(255, 255, 255, 0.75)" : "rgba(0, 0, 0, 0.75)"} 
 `;
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
+const ListTitle = styled.Text`
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  margin-left: 30px;
+`;
+
+const TrendingScroll = styled.FlatList`
+  margin-top: 20px;
+`;
+
+const ListContainer = styled.View`
+  margin-bottom: 40px;
+`;
+
+const ComingSoonTitle = styled(ListTitle)`
+  margin-bottom: 20px;
+`;
+
 const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
-  const isDark = useColorScheme() === "dark";
+  const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const isDark = useColorScheme() === "dark";
   const [nowPlaying, setNowPlaying] = useState([]);
-  const [taglines, setTaglines] = useState({});
-
+  const [upcoming, setUpcoming] = useState([]);
+  const [trending, setTrending] = useState([]);
+  const getTrending = async () => {
+    const { results } = await (
+      await fetch(
+        `https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`
+      )
+    ).json();
+    setTrending(results);
+  };
+  const getUpcoming = async () => {
+    const { results } = await (
+      await fetch(
+        `https://api.themoviedb.org/3/movie/upcoming?api_key=${API_KEY}&language=ko-KR&page=1`
+      )
+    ).json();
+    setUpcoming(results);
+  };
+  const getNowPlaying = async () => {
+    const { results } = await (
+      await fetch(
+        `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=ko-KR&page=1`
+      )
+    ).json();
+    setNowPlaying(results);
+  };
+  const getData = async () => {
+    await Promise.all([getTrending(), getUpcoming(), getNowPlaying()]);
+    setLoading(false);
+  };
   useEffect(() => {
-    const fetchNowPlaying = async () => {
-      try {
-        const response = await fetch(
-          `https://api.themoviedb.org/3/movie/now_playing?language=ko-KR&page=1&region=KR&api_key=${API_KEY}`
-        );
-        const data = await response.json();
-        setNowPlaying(data.results);
-        setLoading(false);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchNowPlaying();
+    getData();
   }, []);
-
-  useEffect(() => {
-    const fetchTaglines = async () => {
-      const fetchedTaglines = await Promise.all(
-        nowPlaying.map(async (movie) => {
-          const response = await fetch(
-            `https://api.themoviedb.org/3/movie/${movie.id}?language=ko-KR&api_key=${API_KEY}`
-          );
-          const data = await response.json();
-          return { [movie.id]: data.tagline };
-        })
-      );
-      setTaglines(Object.assign({}, ...fetchedTaglines));
-    };
-
-    if (nowPlaying.length > 0) {
-      fetchTaglines();
-    }
-  }, [nowPlaying]);
-
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await getData();
+    setRefreshing(false);
+  };
   return loading ? (
     <Loader>
       <ActivityIndicator />
     </Loader>
   ) : (
-    <Container>
+    <Container
+      refreshControl={
+        <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
+      }
+    >
       <Swiper
         horizontal
         loop
         autoplay
-        autoplayTimeout={3.5}
+        autoplayTimeout={4}
         showsButtons={false}
         showsPagination={true}
         paginationStyle={{ marginRight: "35%" }}
         containerStyle={{ width: "100%", height: SCREEN_HEIGHT / 2.5 }}
-        activeDotColor="rgb(255, 255, 255)"
-        dotColor="rgb(94, 94, 94)"
-        dotStyle={{ width: "2%", height: "100%" }}
-        activeDotStyle={{ width: "2%", height: "100%" }}
+        activeDotColor={isDark ? "white" : "black"}
+        dotColor="rgb(128, 128, 128)"
+        dotStyle={{ width: "2%", height: "85%" }}
+        activeDotStyle={{ width: "2%", height: "85%" }}
+        style={{ marginBottom: 20 }}
       >
         {nowPlaying.map((movie) => (
-          <View key={movie.id}>
-            <BgImg
-              style={StyleSheet.absoluteFill}
-              source={{ uri: makeImgPath(movie.backdrop_path) }}
-            />
-            <BlurView
-              tint={isDark ? "dark" : "light"}
-              intensity={120}
-              style={StyleSheet.absoluteFill}
-            >
-              <Wrapper>
-                <Poster source={{ uri: makeImgPath(movie.poster_path) }} />
-                <Column>
-                  <Title isDark={isDark}>{movie.title}</Title>
-                  {movie.vote_average > 0 ? (
-                    <Votes isDark={isDark}>
-                      <Ionicons name="star" size={16} color="#ff904c" />
-                      {movie.vote_average}/10
-                    </Votes>
-                  ) : null}
-                  <TagLine isDark={isDark}>
-                    {(taglines[movie.id] || "").slice(0, 50)}...
-                  </TagLine>
-                </Column>
-              </Wrapper>
-            </BlurView>
-          </View>
+          <Slide
+            key={movie.id}
+            backdropPath={movie.backdrop_path}
+            posterPath={movie.poster_path}
+            originalTitle={movie.original_title}
+            voteAverage={movie.vote_average}
+            overview={movie.overview}
+          />
         ))}
       </Swiper>
+      <ListContainer>
+        <ListTitle>Trending Movies</ListTitle>
+        <TrendingScroll
+          data={trending}
+          horizontal
+          keyExtractor={(item) => item.id + ""}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 30 }}
+          ItemSeparatorComponent={() => <View style={{ width: 30 }} />}
+          renderItem={({ item }) => (
+            <VMedia
+              posterPath={item.poster_path}
+              originalTitle={item.original_title}
+              voteAverage={item.vote_average}
+            />
+          )}
+        />
+      </ListContainer>
+      <ComingSoonTitle>Coming soon</ComingSoonTitle>
+      {upcoming.map((movie) => (
+        <HMedia
+          key={movie.id}
+          posterPath={movie.poster_path}
+          originalTitle={movie.original_title}
+          overview={movie.overview}
+          releaseDate={movie.release_date}
+        />
+      ))}
     </Container>
   );
 };
