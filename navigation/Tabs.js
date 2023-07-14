@@ -21,9 +21,9 @@ const Tabs = () => {
   const isDark = useColorScheme() == "dark";
   return (
     <Tab.Navigator
-    sceneContainerStyle={{
-      backgroundColor: isDark ? BLACK_COLOR : WHITE_COLOR
-    }}
+      sceneContainerStyle={{
+        backgroundColor: isDark ? BLACK_COLOR : WHITE_COLOR,
+      }}
       screenOptions={{
         tabBarStyle: {
           backgroundColor: isDark ? BLACK_COLOR : WHITE_COLOR,
@@ -37,9 +37,10 @@ const Tabs = () => {
         },
         headerTitleAlign: "center",
         headerStyle: {
-          backgroundColor: isDark? BLACK_COLOR : WHITE_COLOR,
+          backgroundColor: isDark ? BLACK_COLOR : WHITE_COLOR,
         },
-        headerTintColor: isDark? WHITE_COLOR : BLACK_COLOR
+        headerTintColor: isDark ? WHITE_COLOR : BLACK_COLOR,
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tab.Screen

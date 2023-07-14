@@ -9,12 +9,12 @@ import {
 import Swiper from "react-native-swiper";
 import { useQuery, useQueryClient } from "react-query";
 import styled from "styled-components/native";
-import { Movie, MovieResponse, moviesApi } from "../api";
+import { MovieResponse, moviesApi } from "../api";
+import HList from "../components/HList";
 import HMedia from "../components/HMedia";
+import Loader from "../components/Loader";
 import Slide from "../components/Slide";
 import VMedia from "../components/VMedia";
-import Loader from "../components/Loader";
-import HList from "../components/HList";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -25,14 +25,9 @@ const ListTitle = styled.Text`
   margin-left: 30px;
 `;
 
-const TrendingScroll = styled.FlatList`
-  margin-top: 20px;
-`;
-
 const ListContainer = styled.View`
   margin-bottom: 40px;
 `;
-
 const ComingSoonTitle = styled(ListTitle)`
   margin-bottom: 20px;
 `;
@@ -46,7 +41,6 @@ const HSeparator = styled.View`
 
 const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
   const queryClient = useQueryClient();
-  const isDark = useColorScheme() === "dark";
   const [refreshing, setRefreshing] = useState(false);
   const { isLoading: nowPlayingLoading, data: nowPlayingData } =
     useQuery<MovieResponse>(["movies", "nowPlaying"], moviesApi.nowPlaying);
@@ -60,7 +54,7 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
     setRefreshing(false);
   };
   const loading = nowPlayingLoading || upcomingLoading || trendingLoading;
-
+  const isDark = useColorScheme() === "dark";
   return loading ? (
     <Loader />
   ) : upcomingData ? (
@@ -92,6 +86,7 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
                 originalTitle={movie.original_title}
                 voteAverage={movie.vote_average}
                 overview={movie.overview}
+                fullData={movie}
               />
             ))}
           </Swiper>
@@ -110,6 +105,7 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
           originalTitle={item.original_title}
           overview={item.overview}
           releaseDate={item.release_date}
+          fullData={item}
         />
       )}
     />

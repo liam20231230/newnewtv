@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { RefreshControl } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useQuery, useQueryClient } from "react-query";
-import { tvApi } from "../api";
+import { TV, tvApi } from "../api";
 import HList from "../components/HList";
 import Loader from "../components/Loader";
 
@@ -27,6 +27,7 @@ const Tv = () => {
     setRefreshing(false);
   };
   const loading = todayLoading || topLoading || trendingLoading;
+
   if (loading) {
     return <Loader />;
   }
